@@ -26,12 +26,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "projectBot_telranbot";
+        return "";
     }
 
     @Override
     public String getBotToken() {
-        return "5983833126:AAGTb_dxm2V2BMH04vF8nLJyjnTwhsWnRLg";
+        return "";
     }
 
 }
