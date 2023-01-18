@@ -15,7 +15,10 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public Channel getChannel(long id) {
-        return channelRepository.findById(id);
+        if (channelRepository.existsByChannelId(id)) {
+            return channelRepository.findByChannelId(id);
+        }
+        return null;
     }
 
     @Override

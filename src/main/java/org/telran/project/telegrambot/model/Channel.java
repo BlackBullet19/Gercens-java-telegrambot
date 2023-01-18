@@ -37,4 +37,12 @@ public class Channel {
     public void setName(String name) {
         this.name = name;
     }
+
+    public Channel(String name, long channelId) {
+        this.name = name;
+        this.channelId = channelId;
+    }
+
+    public Channel() {
+    }
 }

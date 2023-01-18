@@ -9,5 +9,7 @@ import org.telran.project.telegrambot.model.Channel;
 @Repository
 public interface ChannelRepository extends JpaRepository<Channel, Integer> {
 
-    Channel findById(long id);
+    Channel findByChannelId(long id);
+
+    boolean existsByChannelId(long id);
 }
