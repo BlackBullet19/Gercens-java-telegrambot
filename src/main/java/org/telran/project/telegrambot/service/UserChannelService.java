@@ -14,4 +14,8 @@ public interface UserChannelService {
 
     void removeUserSubscription(int userId, Channel channel);
 
+    List<Integer> findAllUsersByChannelId(long channelId);
+
+    void addUserSubscription(int userId, long channelId);
+
 }

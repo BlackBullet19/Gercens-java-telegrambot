@@ -6,4 +6,12 @@ import org.telran.project.telegrambot.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
+
+    User findByName(String name);
+
+    boolean existsByName(String name);
+
+    boolean existsByUserId(long userId);
+
+    User findByUserId(long userId);
 }

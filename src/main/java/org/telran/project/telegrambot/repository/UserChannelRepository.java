@@ -12,10 +12,14 @@ import java.util.List;
 public interface UserChannelRepository extends JpaRepository<UserChannel, Integer> {
 
     @Query("SELECT uc FROM UserChannel uc WHERE uc.userId = :userId")
-    List<UserChannel> findByUserId(@Param("userId")int userId);
+    List<UserChannel> findByUserId(@Param("userId") int userId);
 
     @Query("SELECT uc FROM UserChannel uc WHERE uc.userId = :userId AND uc.channelId = :channelId")
     UserChannel findByUserIdAndChannelId(@Param("userId") int userId, @Param("channelId") long channelId);
 
 
+    boolean existsByUserId(int userId);
+
+    @Query("SELECT uc.userId FROM UserChannel uc WHERE uc.channelId = :channelId")
+    List<Integer> findAllUserIdByChannelId(@Param("channelId") long channelId);
 }

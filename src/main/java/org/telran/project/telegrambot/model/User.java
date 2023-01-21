@@ -10,6 +10,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    private long userId;
+
     private String name;
 
     public int getId() {
@@ -28,8 +30,17 @@ public class User {
         this.name = name;
     }
 
-    public User(String name) {
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
+    public User(String name, long userId) {
         this.name = name;
+        this.userId = userId;
     }
 
     public User() {

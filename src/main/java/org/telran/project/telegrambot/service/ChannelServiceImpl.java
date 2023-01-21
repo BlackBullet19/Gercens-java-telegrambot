@@ -42,4 +42,19 @@ public class ChannelServiceImpl implements ChannelService {
     public List<Channel> listChannels() {
         return channelRepository.findAll();
     }
+
+    @Override
+    public void createChannel(String name, long channelId) {
+        channelRepository.save(new Channel(name, channelId));
+    }
+
+    @Override
+    public void on(long channelId) {
+        channelRepository.changeIsBotEnabledToTrue(channelId);
+    }
+
+    @Override
+    public void off(long channelId) {
+        channelRepository.changeIsBotEnabledToFalse(channelId);
+    }
 }

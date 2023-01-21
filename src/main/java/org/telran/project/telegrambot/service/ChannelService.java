@@ -5,7 +5,7 @@ import org.telran.project.telegrambot.model.Channel;
 
 import java.util.List;
 
-public interface ChannelService {
+public interface ChannelService extends Switchable{
 
     Channel getChannel(long id);
 
@@ -16,4 +16,6 @@ public interface ChannelService {
     Channel updateChannel(long id);
 
     List<Channel> listChannels();
+
+    void createChannel(String name, long channelId);
 }

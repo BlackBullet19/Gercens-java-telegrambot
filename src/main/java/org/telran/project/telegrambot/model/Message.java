@@ -5,8 +5,8 @@ package org.telran.project.telegrambot.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "telegram_messages")
-public class TelegramMessage {
+@Table(name = "messages")
+public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,14 +25,14 @@ public class TelegramMessage {
 
     private boolean isNew = true;
 
-    public TelegramMessage(int messageId, String title, long chatId, String text) {
+    public Message(int messageId, String title, long chatId, String text) {
         this.messageId = messageId;
         this.title = title;
         this.chatId = chatId;
         this.text = text;
     }
 
-    public TelegramMessage() {
+    public Message() {
     }
 
     public int getId() {

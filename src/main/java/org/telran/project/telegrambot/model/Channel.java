@@ -14,6 +14,16 @@ public class Channel {
 
     private long channelId;
 
+    private boolean isBotEnabled = true;
+
+    public boolean isBotEnabled() {
+        return isBotEnabled;
+    }
+
+    public void setBotEnabled(boolean botEnabled) {
+        isBotEnabled = botEnabled;
+    }
+
     public long getChannelId() {
         return channelId;
     }
