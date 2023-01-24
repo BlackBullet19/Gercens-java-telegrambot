@@ -10,32 +10,44 @@ import java.util.List;
 @Service
 public class ChannelServiceImpl implements ChannelService {
 
+    public ChannelServiceImpl(ChannelRepository channelRepository) {
+        this.channelRepository = channelRepository;
+    }
+
+    public ChannelServiceImpl() {
+    }
+
     @Autowired
     private ChannelRepository channelRepository;
 
+
     @Override
-    public Channel getChannel(long id) {
-        if (channelRepository.existsByChannelId(id)) {
-            return channelRepository.findByChannelId(id);
+    public Channel getChannel(long channelId) {
+        if (channelRepository.existsByChannelId(channelId)) {
+            return channelRepository.findByChannelId(channelId);
         }
         return null;
     }
 
     @Override
-    public void createChannel(Channel channel) {
-        channelRepository.save(channel);
+    public Channel createChannel(Channel channel) {
+       return channelRepository.save(channel);
     }
 
     @Override
     public void deleteChannel(long id) {
-        Channel channel = getChannel(id);
-        channelRepository.delete(channel);
-
+        if (channelRepository.existsByChannelId(id)) {
+            Channel channel = channelRepository.findByChannelId(id);
+            channelRepository.delete(channel);
+        }
     }
 
     @Override
     public Channel updateChannel(long id) {
-        return getChannel(id);
+        if (channelRepository.existsByChannelId(id)) {
+            return channelRepository.findByChannelId(id);
+        }
+        return null;
     }
 
     @Override
@@ -44,8 +56,8 @@ public class ChannelServiceImpl implements ChannelService {
     }
 
     @Override
-    public void createChannel(String name, long channelId) {
-        channelRepository.save(new Channel(name, channelId));
+    public Channel createChannel(String name, long channelId) {
+       return channelRepository.save(new Channel(name, channelId));
     }
 
     @Override

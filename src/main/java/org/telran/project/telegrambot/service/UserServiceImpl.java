@@ -52,4 +52,21 @@ public class UserServiceImpl implements UserService {
             userRepository.save(new User(name, userId));
         }
     }
+
+    @Override
+    public User createUserWithoutSavingToRepository(String name, long userId) {
+        return new User(name, userId);
+    }
+
+    @Override
+    public void saveAllUsers(List<User> list) {
+        userRepository.saveAll(list);
+    }
+
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public UserServiceImpl() {
+    }
 }

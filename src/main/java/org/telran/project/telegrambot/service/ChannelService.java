@@ -9,7 +9,7 @@ public interface ChannelService extends Switchable{
 
     Channel getChannel(long id);
 
-    void createChannel(Channel channel);
+    Channel createChannel(Channel channel);
 
     void deleteChannel(long id);
 
@@ -17,5 +17,5 @@ public interface ChannelService extends Switchable{
 
     List<Channel> listChannels();
 
-    void createChannel(String name, long channelId);
+    Channel createChannel(String name, long channelId);
 }

@@ -27,7 +27,7 @@ public class UserChannelController {
     }
 
     @DeleteMapping()
-    public void removeUserSubscription(@PathVariable(name = "userid") int userId, @RequestBody Channel channel) {
-        userChannelService.removeUserSubscription(userId, channel);
+    public void removeUserSubscription(@PathVariable(name = "userid") int userId, @RequestBody long channelId) {
+        userChannelService.removeUserSubscription(userId, channelId);
     }
 }

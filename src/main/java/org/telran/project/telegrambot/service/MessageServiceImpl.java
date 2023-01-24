@@ -35,7 +35,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Message updateMessage(int messageId) {
-        return getMessage(messageId);
+        return messageRepository.findByMessageId(messageId);
     }
 
     @Override
@@ -49,7 +49,14 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void changeIsNewToFalse(int id) {
-        messageRepository.changeIsNewToFalse(id);
+    public void changeIsNewToFalse(int fromId, int toId) {
+        messageRepository.changeIsNewToFalse(fromId, toId);
+    }
+
+    public MessageServiceImpl(MessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
+
+    public MessageServiceImpl() {
     }
 }

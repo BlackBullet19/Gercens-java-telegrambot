@@ -19,7 +19,4 @@ public interface UserChannelRepository extends JpaRepository<UserChannel, Intege
 
 
     boolean existsByUserId(int userId);
-
-    @Query("SELECT uc.userId FROM UserChannel uc WHERE uc.channelId = :channelId")
-    List<Integer> findAllUserIdByChannelId(@Param("channelId") long channelId);
 }

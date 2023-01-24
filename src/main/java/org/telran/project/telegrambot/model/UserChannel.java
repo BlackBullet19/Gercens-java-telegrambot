@@ -1,6 +1,7 @@
 package org.telran.project.telegrambot.model;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "user_channels")
@@ -16,6 +17,7 @@ public class UserChannel {
     @Column(name = "channel_id")
     private long channelId;
 
+
     public int getUserId() {
         return userId;
     }
@@ -30,6 +32,19 @@ public class UserChannel {
 
     public void setChannelId(int channelId) {
         this.channelId = channelId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserChannel that = (UserChannel) o;
+        return userId == that.userId && channelId == that.channelId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, channelId);
     }
 
     public UserChannel(int userId, long channelId) {

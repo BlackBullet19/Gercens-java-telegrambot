@@ -20,5 +20,5 @@ public interface MessageService {
 
     List<Message> listAllNewMessages();
 
-    void changeIsNewToFalse(int id);
+    void changeIsNewToFalse(int fromId, int toId);
 }

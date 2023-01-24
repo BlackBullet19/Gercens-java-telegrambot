@@ -19,4 +19,11 @@ public class CommandServiceImpl implements CommandService {
             channelService.off(channelId);
         }
     }
+
+    public CommandServiceImpl(ChannelService channelService) {
+        this.channelService = channelService;
+    }
+
+    public CommandServiceImpl() {
+    }
 }

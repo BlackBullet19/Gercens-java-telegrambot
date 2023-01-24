@@ -30,18 +30,37 @@ public class UserChannelServiceImpl implements UserChannelService {
     }
 
     @Override
-    public void removeUserSubscription(int userId, Channel channel) {
-        UserChannel userChannel = userChannelRepository.findByUserIdAndChannelId(userId, channel.getChannelId());
-        userChannelRepository.delete(userChannel);
-    }
-
-    @Override
-    public List<Integer> findAllUsersByChannelId(long channelId) {
-        return userChannelRepository.findAllUserIdByChannelId(channelId);
+    public void removeUserSubscription(int userId, long channelId) {
+        UserChannel userChannel = userChannelRepository.findByUserIdAndChannelId(userId, channelId);
+        if (userChannel != null) {
+            userChannelRepository.delete(userChannel);
+        }
     }
 
     @Override
     public void addUserSubscription(int userId, long channelId) {
         userChannelRepository.save(new UserChannel(userId, channelId));
+    }
+
+    @Override
+    public List<UserChannel> listAll() {
+        return userChannelRepository.findAll();
+    }
+
+    @Override
+    public UserChannel createUserChannelWithoutSavingToRepository(int userId, long channelId) {
+        return new UserChannel(userId, channelId);
+    }
+
+    @Override
+    public void saveAllUsers(List<UserChannel> list) {
+        userChannelRepository.saveAll(list);
+    }
+
+    public UserChannelServiceImpl(UserChannelRepository userChannelRepository) {
+        this.userChannelRepository = userChannelRepository;
+    }
+
+    public UserChannelServiceImpl() {
     }
 }

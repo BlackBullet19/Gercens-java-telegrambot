@@ -3,9 +3,10 @@ package org.telran.project.telegrambot.model;
 
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
-@Table(name = "messages")
+@Table(name = "message")
 public class Message {
 
     @Id
@@ -81,5 +82,18 @@ public class Message {
 
     public void setNew(boolean aNew) {
         isNew = aNew;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Message message = (Message) o;
+        return messageId == message.messageId && chatId == message.chatId && isNew == message.isNew && Objects.equals(title, message.title) && Objects.equals(text, message.text);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(messageId, title, chatId, text, isNew);
     }
 }

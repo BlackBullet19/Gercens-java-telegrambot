@@ -1,10 +1,13 @@
 package org.telran.project.telegrambot.model;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
+
+    private static final String DEFAULT_USERNAME = "user";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,10 +42,23 @@ public class User {
     }
 
     public User(String name, long userId) {
-        this.name = name;
+        this.name = name.isEmpty() ? DEFAULT_USERNAME : name;
         this.userId = userId;
     }
 
     public User() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return userId == user.userId && Objects.equals(name, user.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, name);
     }
 }

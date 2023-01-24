@@ -19,4 +19,8 @@ public interface UserService {
     User getUserByUserId(long userId);
 
     void createUser(String name, long userId);
+
+    User createUserWithoutSavingToRepository(String name, long userId);
+
+    void saveAllUsers(List<User> list);
 }

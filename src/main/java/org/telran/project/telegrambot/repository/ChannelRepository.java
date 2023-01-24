@@ -18,12 +18,12 @@ public interface ChannelRepository extends JpaRepository<Channel, Integer> {
     boolean existsByChannelId(long id);
 
     @Transactional
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Channel ch SET ch.isBotEnabled = false WHERE ch.channelId = :channelId ")
     void changeIsBotEnabledToFalse(@Param("channelId") long channelId);
 
     @Transactional
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Channel ch SET ch.isBotEnabled = true WHERE ch.channelId = :channelId ")
     void changeIsBotEnabledToTrue(@Param("channelId") long channelId);
 }

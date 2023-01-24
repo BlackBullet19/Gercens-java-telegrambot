@@ -15,23 +15,23 @@ public class ChannelController {
     private ChannelService channelService;
 
     @GetMapping("/{id}")
-    public Channel getChannel(@PathVariable(name = "id")long id) {
+    public Channel getChannel(@PathVariable(name = "id") long id) {
         return channelService.getChannel(id);
     }
 
     @PostMapping()
-    public void createChannel(@RequestBody Channel channel) {
-        channelService.createChannel(channel);
+    public Channel createChannel(@RequestBody Channel channel) {
+        return channelService.createChannel(channel);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteChannel(@PathVariable(name = "id")long id) {
+    public void deleteChannel(@PathVariable(name = "id") long id) {
         channelService.deleteChannel(id);
     }
 
     @PutMapping("/{id}")
-    public void updateChannel(@PathVariable(name = "id")long id) {
-        channelService.updateChannel(id);
+    public Channel updateChannel(@PathVariable(name = "id") long id) {
+        return channelService.updateChannel(id);
     }
 
     @GetMapping
