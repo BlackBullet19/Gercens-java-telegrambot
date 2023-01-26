@@ -13,13 +13,11 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Integer> {
 
-    Message findByMessageId(int id);
-
     @Query("SELECT m FROM Message m WHERE m.isNew = true")
     List<Message> findAllNewMessages();
 
     @Transactional
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Message m SET m.isNew = false WHERE m.id BETWEEN :fromId AND :toId")
-    void changeIsNewToFalse(@Param("fromId") int fromId, @Param("toId") int toId );
+    @Query("UPDATE Message m SET m.isNew = false WHERE m.id IN :messageIds")
+    void changeIsNewToFalse(@Param("messageIds") List<Integer> messageIds);
 }

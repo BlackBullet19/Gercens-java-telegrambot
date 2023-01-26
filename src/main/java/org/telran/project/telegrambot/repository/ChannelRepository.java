@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.telran.project.telegrambot.model.Channel;
 
+import java.util.List;
+
 
 
 @Repository
@@ -26,4 +28,7 @@ public interface ChannelRepository extends JpaRepository<Channel, Integer> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Channel ch SET ch.isBotEnabled = true WHERE ch.channelId = :channelId ")
     void changeIsBotEnabledToTrue(@Param("channelId") long channelId);
+
+    @Query("SELECT ch.id FROM Channel ch WHERE ch.channelId IN :channelIds")
+    List<Integer> findAllIdsByChannelIdFromUniqueChannelIdsList(@Param("channelIds")List<Long> channelIds);
 }

@@ -8,19 +8,21 @@ public interface UserService {
 
     List<User> list();
 
-    void createUser(User user);
+    User createUser(User user);
 
     void deleteUser(int id);
 
     User getUser(int id);
 
-    User getUserByUsername(String username);
-
     User getUserByUserId(long userId);
 
-    void createUser(String name, long userId);
+    User createUser(String name, long userId);
 
     User createUserWithoutSavingToRepository(String name, long userId);
 
-    void saveAllUsers(List<User> list);
+    List<User> saveAllUsers(List<User> list);
+
+    boolean existsById(int id);
+
+    User updateUser(int id, User user);
 }

@@ -1,6 +1,10 @@
 package org.telran.project.telegrambot.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+
 
 @Entity
 @Table(name = "channel")
@@ -10,8 +14,10 @@ public class Channel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NotBlank
     private String name;
 
+    @NotNull
     private long channelId;
 
     private boolean isBotEnabled = true;
@@ -28,8 +34,8 @@ public class Channel {
         return channelId;
     }
 
-    public void setChannelId(long groupId) {
-        this.channelId = groupId;
+    public void setChannelId(long channelId) {
+        this.channelId = channelId;
     }
 
     public int getId() {

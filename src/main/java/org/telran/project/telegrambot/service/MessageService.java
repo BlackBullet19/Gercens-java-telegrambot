@@ -10,15 +10,17 @@ public interface MessageService {
 
     Message getMessage(int messageId);
 
-    void createMessage(Message message);
+    Message createMessage(Message message);
 
     void removeMessage(int messageId);
 
-    Message updateMessage(int messageId);
+    Message updateMessage(int messageId, Message message);
 
-    void createMessage(int messageId, String title, long chatId, String text);
+    Message createMessage(String title, long chatId, String text);
 
     List<Message> listAllNewMessages();
 
-    void changeIsNewToFalse(int fromId, int toId);
+    void changeIsNewToFalse(List<Integer> Ids);
+
+    List<Message> getMessagesAndMarkThemOld();
 }

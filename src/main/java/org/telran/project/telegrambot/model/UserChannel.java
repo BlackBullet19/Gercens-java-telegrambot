@@ -1,22 +1,24 @@
 package org.telran.project.telegrambot.model;
 
 import javax.persistence.*;
-import java.util.Objects;
+import javax.validation.constraints.NotNull;
+
 
 @Entity
-@Table(name = "user_channels")
+@Table(name = "user_channel")
 public class UserChannel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NotNull
     @Column(name = "user_id")
     private int userId;
 
+    @NotNull
     @Column(name = "channel_id")
-    private long channelId;
-
+    private int channelId;
 
     public int getUserId() {
         return userId;
@@ -26,7 +28,7 @@ public class UserChannel {
         this.userId = userId;
     }
 
-    public long getChannelId() {
+    public int getChannelId() {
         return channelId;
     }
 
@@ -34,20 +36,15 @@ public class UserChannel {
         this.channelId = channelId;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserChannel that = (UserChannel) o;
-        return userId == that.userId && channelId == that.channelId;
+    public int getId() {
+        return id;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId, channelId);
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public UserChannel(int userId, long channelId) {
+    public UserChannel(int userId, int channelId) {
         this.userId = userId;
         this.channelId = channelId;
     }

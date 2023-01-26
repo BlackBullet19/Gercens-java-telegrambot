@@ -2,13 +2,12 @@ package org.telran.project.telegrambot.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
+import org.telran.project.telegrambot.model.User;
 import org.telran.project.telegrambot.model.UserChannel;
 
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import java.util.List;
 
 
 @Service
-@PropertySource("bot.properties")
 public class MyTelegramBot extends TelegramLongPollingBot {
 
     private static final String DEFAULT_BOT_NAME = "";
@@ -49,16 +47,15 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
         if (update.hasChannelPost()) {
             Message channelPost = update.getChannelPost();
+            channelPost.getChatId();
             messageDataProcessing(channelPost);
         }
         if (update.hasMessage()) {
             Message message = update.getMessage();
             messageDataProcessing(message);
-            List<User> newChatMembers = message.getNewChatMembers();
-            if (newChatMembers != null) {
+            if (message.getNewChatMembers() != null) {
                 List<org.telran.project.telegrambot.model.User> list = userService.list();
-                saveNewUsers(newChatMembers, list);
-                saveNewUserChannelSubscriptions(newChatMembers, message.getChat(), list);
+                saveNewUsers(message, list);
             }
         }
     }
@@ -69,58 +66,55 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             commandService.executeCommand(message.getText(), message.getChatId());
         }
         if (chat.isGroupChat() || chat.isSuperGroupChat() || chat.isChannelChat()) {
-            saveChannelOrGroup(chat);
+            if (!channelService.existsByChannelId(chat.getId())) {
+                channelService.createChannel(chat.getTitle(), chat.getId());
+            }
             saveMessage(message, chat);
         }
     }
 
-    private void saveChannelOrGroup(Chat chat) {
-        String title = chat.getTitle();
-        long id = chat.getId();
-        if (channelService.getChannel(id) == null) {
-            channelService.createChannel(title, id);
-        }
-    }
-
     private void saveMessage(Message message, Chat chat) {
-        String text = message.getText();
-        Integer messageId = message.getMessageId();
         if (message.hasText() && !message.isCommand()) {
-            if (channelService.getChannel(chat.getId()).isBotEnabled()) {
-                messageService.createMessage(messageId, chat.getTitle(), chat.getId(), text);
+            String text = message.getText();
+            if (channelService.getChannelByChannelId(chat.getId()).isBotEnabled()) {
+                messageService.createMessage(chat.getTitle(), chat.getId(), text);
             }
         }
     }
 
-    private void saveNewUserChannelSubscriptions(List<User> newChatMembers, Chat chat,
+    private void saveNewUserChannelSubscriptions(Message message,
                                                  List<org.telran.project.telegrambot.model.User> userList) {
+
         List<UserChannel> userChannels = userChannelService.listAll();
+        int channelId = channelService.getChannelByChannelId(message.getChatId()).getId();
         List<UserChannel> newSubscriptions = new ArrayList<>();
-        newChatMembers.forEach(m -> {
-            org.telran.project.telegrambot.model.User userByUserId =
-                    userList.stream().filter(user -> user.getUserId() == m.getId()).findFirst().orElse(null);
-            if (userByUserId != null) {
-                int userIntId = userByUserId.getId();
-                UserChannel newUserChannel = userChannelService
-                        .createUserChannelWithoutSavingToRepository(userIntId, chat.getId());
-                if (!userChannels.contains(newUserChannel)) {
-                    newSubscriptions.add(newUserChannel);
-                }
+
+        message.getNewChatMembers().forEach(m -> {
+            org.telran.project.telegrambot.model.User userByUserTelegramId =
+                    userList.stream().filter(user -> user.getUserId() == m.getId()).findFirst().get();
+
+            int userId = userByUserTelegramId.getId();
+            UserChannel newUserChannel = userChannelService
+                    .createUserChannelWithoutSavingToRepository(userId, channelId);
+            if (!userChannels.contains(newUserChannel)) {
+                newSubscriptions.add(newUserChannel);
+
             }
+            userChannelService.saveAllUserSubscriptions(newSubscriptions);
         });
-        userChannelService.saveAllUsers(newSubscriptions);
     }
 
-    private void saveNewUsers(List<User> newChatMembers, List<org.telran.project.telegrambot.model.User> list) {
+    private void saveNewUsers(Message message, List<org.telran.project.telegrambot.model.User> list) {
         List<org.telran.project.telegrambot.model.User> myNewUserList = new ArrayList<>();
-        newChatMembers.forEach(member -> {
+        message.getNewChatMembers().forEach(member -> {
             org.telran.project.telegrambot.model.User newUser =
                     userService.createUserWithoutSavingToRepository(member.getUserName(), member.getId());
             if (!list.contains(newUser)) {
                 myNewUserList.add(newUser);
             }
         });
-        userService.saveAllUsers(myNewUserList);
+        List<User> userList = userService.saveAllUsers(myNewUserList);
+        saveNewUserChannelSubscriptions(message, userList);
     }
 
     @Override

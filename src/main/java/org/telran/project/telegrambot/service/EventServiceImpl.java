@@ -1,19 +1,16 @@
 package org.telran.project.telegrambot.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.telran.project.telegrambot.model.*;
+import org.telran.project.telegrambot.model.Event;
+import org.telran.project.telegrambot.model.Message;
+import org.telran.project.telegrambot.model.UserChannel;
 import org.telran.project.telegrambot.repository.EventRepository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
-@PropertySource("schedule.properties")
 public class EventServiceImpl implements EventService {
 
 
@@ -22,9 +19,6 @@ public class EventServiceImpl implements EventService {
 
     @Autowired
     private UserChannelService userChannelService;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private ChannelService channelService;
@@ -37,96 +31,41 @@ public class EventServiceImpl implements EventService {
     @Override
     public void createNewEvents() {
 
-        List<Message> messages = getMessagesAndMarkThemOld();
+        List<Message> messages = messageService.getMessagesAndMarkThemOld();
         if (messages.isEmpty()) return;
 
-        List<User> userList = userService.list();
-        List<Channel> channelList = channelService.listChannels();
-        List<Long> listOfChannelIds = getListOfUniqueChannelIds(messages);
+        List<Long> uniqueChannelIdsFromMessages = messages.stream().map(Message::getChatId).distinct().toList();
 
-        listOfChannelIds.forEach(channelId -> {
-            List<Integer> allSubscribedUserIdsByChannelId = getAllSubscribedUsersForThisChannels(channelId);
-            allSubscribedUserIdsByChannelId.forEach(u -> {
-                String username = getUsername(userList, u);
-                String channelName = getChannelName(channelList, channelId);
+        List<Integer> channelIds = channelService.
+                findAllIdsByChannelIdFromUniqueChannelIdsList(uniqueChannelIdsFromMessages);
 
-                String text = "Hello, " + username + " in group - '"
-                        + channelName + "' you have new messages!";
-                createEvent(u, text);
-            });
-        });
-    }
+        List<UserChannel> allUserChannelsByChannelIdFromIdsList = userChannelService
+                .findAllUserChannelsByChannelIdFromIdsList(channelIds);
 
-    private String getChannelName(List<Channel> channelList, Long channelId) {
-        String channelName = null;
-        Channel channel = channelList.stream()
-                .filter(ch -> ch.getChannelId() == channelId).findFirst().orElse(null);
-        if (channel != null) {
-            channelName = channel.getName();
-        }
-        return channelName;
-    }
+        String text = "Hi! You have new messages";
 
-    private String getUsername(List<User> userList, Integer u) {
-        String username = null;
-        User user = userList.stream()
-                .filter(el -> el.getId() == u).findFirst().orElse(null);
-        if (user != null) {
-            username = user.getName();
-        }
-        return username;
-    }
-
-    private List<Integer> getAllSubscribedUsersForThisChannels(long channelId) {
-        List<UserChannel> allUserChannels = userChannelService.listAll();
-        List<Integer> allSubscribedUserIdsByChannelId = new ArrayList<>();
-        allUserChannels.forEach(channel -> {
-            if (channel.getChannelId() == channelId) {
-                allSubscribedUserIdsByChannelId.add(channel.getUserId());
-            }
-        });
-        return allSubscribedUserIdsByChannelId;
-    }
-
-    private List<Long> getListOfUniqueChannelIds(List<Message> messages) {
-        Set<Long> channelIds = new HashSet<>();
-        for (Message m : messages) {
-            channelIds.add(m.getChatId());
-        }
-        return channelIds.stream().toList();
-    }
-
-    private List<Message> getMessagesAndMarkThemOld() {
-        List<Message> messages = messageService.listAllNewMessages();
-        if (!messages.isEmpty()) {
-            Message firstNewMessage = messages.get(0);
-            int fromId = firstNewMessage.getId();
-            Message lastNewMessage = messages.get(messages.size() - 1);
-            int toId = lastNewMessage.getId();
-            messageService.changeIsNewToFalse(fromId, toId);
-        }
-        return messages;
+        allUserChannelsByChannelIdFromIdsList.forEach(userChannel ->
+                createEvent(userChannel.getUserId(), text, userChannel.getChannelId()));
     }
 
     @Override
     public List<Event> getNewEventsByUserId(int userId) {
-        return eventRepository.findAllByUserId(userId);
+        if (eventRepository.existsByUserId(userId)) {
+            List<Event> allNewEventsByUserId = eventRepository.findAllByUserId(userId);
+            allNewEventsByUserId.forEach(ev -> ev.setNew(false));
+            return eventRepository.saveAll(allNewEventsByUserId);
+        }
+        throw new IllegalArgumentException("userId is not valid");
     }
 
     @Override
-    public void createEvent(int userId, String text) {
-        eventRepository.save(new Event(text, userId));
-    }
-
-    public EventServiceImpl() {
-    }
-
-    public EventServiceImpl(MessageService messageService, UserChannelService userChannelService,
-                            UserService userService, ChannelService channelService, EventRepository eventRepository) {
-        this.messageService = messageService;
-        this.userChannelService = userChannelService;
-        this.userService = userService;
-        this.channelService = channelService;
-        this.eventRepository = eventRepository;
+    public void createEvent(int userId, String text, int channelId) {
+        if (userId == 0) {
+            throw new IllegalArgumentException("userId is not valid");
+        }
+        if (channelId == 0) {
+            throw new IllegalArgumentException("channelId is not valid");
+        }
+        eventRepository.save(new Event(text, userId, channelId));
     }
 }

@@ -11,19 +11,11 @@ public class CommandServiceImpl implements CommandService {
     private ChannelService channelService;
 
     @Override
-    public void executeCommand(String command,long channelId) {
-
+    public void executeCommand(String command, long channelId) {
         if (Command.START.getName().equals(command)) {
             channelService.on(channelId);
         } else if (Command.STOP.getName().equals(command)) {
             channelService.off(channelId);
         }
-    }
-
-    public CommandServiceImpl(ChannelService channelService) {
-        this.channelService = channelService;
-    }
-
-    public CommandServiceImpl() {
     }
 }
