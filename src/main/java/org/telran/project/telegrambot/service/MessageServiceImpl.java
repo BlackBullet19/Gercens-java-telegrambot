@@ -8,75 +8,41 @@ import org.telran.project.telegrambot.repository.MessageRepository;
 import java.security.InvalidParameterException;
 import java.util.List;
 
+/**
+ * MessageService implementation to create and get messages received from bot
+ *
+ * @author Olegs Gercens
+ */
 @Service
 public class MessageServiceImpl implements MessageService {
 
     @Autowired
     MessageRepository messageRepository;
 
-    @Override
-    public List<Message> list() {
-        return messageRepository.findAll();
-    }
-
-    @Override
-    public Message getMessage(int id) {
-        if (messageRepository.existsById(id)) {
-            return messageRepository.findById(id).get();
-        }
-        throw new IllegalArgumentException("Invalid channel identifier");
-    }
-
-    @Override
-    public Message createMessage(Message message) {
-        if (message.getChatId() == 0 || message.getTitle() == null) {
-            throw new IllegalArgumentException("Parameters are not valid");
-        }
-        Message newMessage = new Message(message.getTitle(), message.getChatId(), message.getText());
-        return messageRepository.save(newMessage);
-    }
-
-    @Override
-    public void removeMessage(int id) {
-        if (messageRepository.existsById(id)) {
-            Message message = messageRepository.findById(id).get();
-            messageRepository.delete(message);
-        }
-        throw new IllegalArgumentException("Invalid identifier");
-    }
-
-    @Override
-    public Message updateMessage(int id, Message message) {
-        if (messageRepository.existsById(id)) {
-            Message existingMessage = messageRepository.findById(id).get();
-            if (message != null) {
-                existingMessage.setChatId(message.getChatId());
-                existingMessage.setTitle(message.getTitle());
-            }
-            return messageRepository.save(existingMessage);
-        }
-        throw new InvalidParameterException("Parameters are not valid");
-    }
-
+    /**
+     * Registers to save entity Message
+     *
+     * @param title  channel/group title
+     * @param chatId external identifier
+     * @param text   of message
+     * @return entity Message
+     * @throws InvalidParameterException - if at least one entered parameter was 0 or empty
+     */
     @Override
     public Message createMessage(String title, long chatId, String text) {
         if (chatId == 0 || title == null) {
-            throw new IllegalArgumentException("Parameters are not valid");
+            throw new InvalidParameterException("At least one entered parameter was 0 or empty");
         }
         Message newMessage = new Message(title, chatId, text);
         return messageRepository.save(newMessage);
     }
 
-    @Override
-    public List<Message> listAllNewMessages() {
-        return messageRepository.findAllNewMessages();
-    }
-
-    @Override
-    public void changeIsNewToFalse(List<Integer> Ids) {
-        messageRepository.changeIsNewToFalse(Ids);
-    }
-
+    /**
+     * Method that gets new messages, then change status new to old(isNew=true to isNew=false),
+     * then gives this list further to create events
+     *
+     * @return a list of new messages
+     */
     @Override
     public List<Message> getMessagesAndMarkThemOld() {
         List<Message> messages = messageRepository.findAllNewMessages();

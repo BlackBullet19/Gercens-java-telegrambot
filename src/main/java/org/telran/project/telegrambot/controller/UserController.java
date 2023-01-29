@@ -9,6 +9,7 @@ import org.telran.project.telegrambot.service.UserService;
 
 import javax.validation.Valid;
 import java.security.InvalidParameterException;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/users")
@@ -19,11 +20,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<?> list() {
-        try {
-            return new ResponseEntity<>(userService.list(), HttpStatus.OK);
-        } catch (InvalidParameterException exception) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
-        }
+        return new ResponseEntity<>(userService.list(), HttpStatus.OK);
     }
 
     @PostMapping()
@@ -31,9 +28,9 @@ public class UserController {
         try {
             return new ResponseEntity<>(userService.createUser(user), HttpStatus.OK);
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        } catch (IllegalStateException exception) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        } catch (UnsupportedOperationException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(exception.getMessage());
         }
     }
 
@@ -43,7 +40,9 @@ public class UserController {
             userService.deleteUser(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        } catch (NoSuchElementException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
         }
     }
 
@@ -52,7 +51,9 @@ public class UserController {
         try {
             return new ResponseEntity<>(userService.getUser(id), HttpStatus.OK);
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        } catch (NoSuchElementException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
         }
     }
 
@@ -61,7 +62,11 @@ public class UserController {
         try {
             return new ResponseEntity<>(userService.updateUser(id, user), HttpStatus.OK);
         } catch (InvalidParameterException exception) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        } catch (NoSuchElementException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
         }
     }
 }

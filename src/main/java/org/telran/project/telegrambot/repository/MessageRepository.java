@@ -13,9 +13,17 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Integer> {
 
+    /**
+     * Return all messages which is new
+     * @return List of new messages
+     */
     @Query("SELECT m FROM Message m WHERE m.isNew = true")
     List<Message> findAllNewMessages();
 
+    /**
+     * Changing value of isNew to false depending on ids from Integer list
+     * @param messageIds
+     */
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Message m SET m.isNew = false WHERE m.id IN :messageIds")

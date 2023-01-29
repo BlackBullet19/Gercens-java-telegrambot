@@ -9,45 +9,84 @@ import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Implementation of ChannelService interface, to work with Channel entities,
+ * for example get, create, remove or update
+ *
+ * @author Olegs Gercens
+ */
 @Service
 public class ChannelServiceImpl implements ChannelService {
-
 
     @Autowired
     private ChannelRepository channelRepository;
 
+    /**
+     * Returns channel entity by specific identifier
+     *
+     * @param id channel identifier
+     * @return channel entity by specific identifier
+     * @throws IllegalArgumentException - if identifier is 0
+     * @throws NoSuchElementException   - if channel not found
+     */
     @Override
     public Channel getChannel(int id) {
+        if (id == 0) throw new IllegalArgumentException("Entered value can not be 0");
         if (channelRepository.existsById(id)) {
             return channelRepository.findById(id).get();
         }
-        throw new IllegalArgumentException("Invalid identifier");
+        throw new NoSuchElementException("Channel with value " + id + " not found");
     }
 
+    /**
+     * Returns channel entity by specific external identifier
+     *
+     * @param channelId channel external identifier
+     * @return channel entity by specific identifier
+     * @throws IllegalArgumentException - if identifier is 0
+     * @throws NoSuchElementException   - if channel not found
+     */
     @Override
     public Channel getChannelByChannelId(long channelId) {
+        if (channelId == 0) throw new IllegalArgumentException("Entered value can not be 0");
         if (channelRepository.existsByChannelId(channelId)) {
             return channelRepository.findByChannelId(channelId);
         }
-        throw new IllegalArgumentException("Invalid channel identifier");
+        throw new NoSuchElementException("Channel with ID " + channelId + " not found");
     }
 
+    /**
+     * Registers to save new Channel entity
+     *
+     * @param channel - entity to save
+     * @return channel entity
+     * @throws InvalidParameterException     - if at least one channel parameter was 0 or empty
+     * @throws UnsupportedOperationException - if Channel with entered parameters already exists
+     */
     @Override
     public Channel createChannel(Channel channel) {
         if (channel.getName() == null || channel.getChannelId() == 0) {
-            throw new IllegalArgumentException("Parameters are not valid");
+            throw new InvalidParameterException("At least one entered parameter was 0 or empty");
         }
         if (channelRepository.existsByChannelId(channel.getChannelId())) {
-            throw new IllegalStateException("Channel already exists");
+            throw new UnsupportedOperationException("Channel with entered parameters already exists");
         }
         Channel newChannel = new Channel(channel.getName(), channel.getChannelId());
         return channelRepository.save(newChannel);
     }
 
+    /**
+     * Remove Channel entity by specific identifier
+     *
+     * @param id - channel specific identifier
+     * @throws IllegalArgumentException - if identifier is 0
+     * @throws NoSuchElementException   - if channel not found
+     */
     @Override
     public void deleteChannel(int id) {
-        if(!channelRepository.existsById(id)){
-            throw new IllegalArgumentException("Invalid identifier");
+        if (id == 0) throw new IllegalArgumentException("Entered value can not be 0");
+        if (!channelRepository.existsById(id)) {
+            throw new NoSuchElementException("Channel with ID " + id + " not found");
         }
         if (channelRepository.existsById(id)) {
             Channel channel = channelRepository.findById(id).get();
@@ -55,62 +94,93 @@ public class ChannelServiceImpl implements ChannelService {
         }
     }
 
+    /**
+     * Updates data for specific Channel entity using data from entity given ir arguments
+     *
+     * @param id      - specific channel identifier
+     * @param channel - entity containing changes
+     * @return Existing Channel entity with changes made
+     * @throws IllegalArgumentException  - if identifier is 0
+     * @throws NoSuchElementException    - if channel not found
+     * @throws InvalidParameterException - if at least one entered parameter was 0 or empty
+     */
     @Override
     public Channel updateChannel(int id, Channel channel) {
-        if (channelRepository.existsById(id)) {
-            Channel existingChannel = channelRepository.findById(id).get();
-            if (channel != null) {
-                existingChannel.setChannelId(channel.getChannelId());
-                existingChannel.setName(channel.getName());
-            }
-            return channelRepository.save(existingChannel);
+        if (id == 0) throw new IllegalArgumentException("Entered value can not be 0");
+        if (!channelRepository.existsById(id)) {
+            throw new NoSuchElementException("Channel with ID " + id + " not found");
         }
-        throw new InvalidParameterException("Parameters are not valid");
+        if (channel.getName() == null || channel.getChannelId() == 0) {
+            throw new InvalidParameterException("At least one entered parameter was 0 or empty");
+        }
+        Channel existingChannel = channelRepository.findById(id).get();
+        existingChannel.setChannelId(channel.getChannelId());
+        existingChannel.setName(channel.getName());
+        return channelRepository.save(existingChannel);
     }
 
+    /**
+     * Returns a list of all Channel entities
+     *
+     * @return a list of all Channel entities
+     */
     @Override
     public List<Channel> listChannels() {
         return channelRepository.findAll();
     }
 
-    @Override
-    public Channel createChannel(String name, long channelId) {
-        if (name == null || channelId == 0) {
-            throw new IllegalArgumentException("Parameters are not valid");
-        }
-        if (channelRepository.existsByChannelId(channelId)) {
-            throw new IllegalStateException("Channel already exists");
-        }
-        Channel newChannel = new Channel(name, channelId);
-        return channelRepository.save(newChannel);
-    }
-
+    /**
+     * Changes a value of isBotEnabled to true for specific Channel by external identifier
+     *
+     * @param channelId - external identifier
+     * @throws IllegalArgumentException - if external identifier was 0
+     * @throws NoSuchElementException   - if Channel not found
+     */
     @Override
     public void on(long channelId) {
-        if (channelRepository.existsByChannelId(channelId)) {
-            channelRepository.changeIsBotEnabledToTrue(channelId);
+        if (channelId == 0) throw new IllegalArgumentException("Entered value can not be 0");
+        if (!channelRepository.existsByChannelId(channelId)) {
+            throw new NoSuchElementException("Channel with ChannelId " + channelId + " not found");
         }
-        throw new NoSuchElementException("Channel with this identifier not found");
+        channelRepository.changeIsBotEnabledToTrue(channelId);
     }
 
+    /**
+     * Changes a value of isBotEnabled to false for specific Channel by external identifier
+     *
+     * @param channelId - external identifier
+     * @throws IllegalArgumentException - if external identifier was 0
+     * @throws NoSuchElementException   - if Channel not found
+     */
     @Override
     public void off(long channelId) {
-        if (channelRepository.existsByChannelId(channelId)) {
-            channelRepository.changeIsBotEnabledToFalse(channelId);
+        if (channelId == 0) throw new IllegalArgumentException("Entered value can not be 0");
+        if (!channelRepository.existsByChannelId(channelId)) {
+            throw new NoSuchElementException("Channel with ChannelId " + channelId + " not found");
         }
-        throw new NoSuchElementException("Channel with this identifier not found");
+        channelRepository.changeIsBotEnabledToFalse(channelId);
     }
 
-    @Override
-    public boolean existsByChannelId(long channelId) {
-       return channelRepository.existsByChannelId(channelId);
-    }
-
+    /**
+     * Returns true if specific Channel is present by identifier
+     *
+     * @param id channel identifier
+     * @return true if specific Channel is present
+     * @throws IllegalArgumentException - if identifier was 0
+     */
     @Override
     public boolean existsById(int id) {
+        if (id == 0) throw new IllegalArgumentException("Entered value can not be 0");
         return channelRepository.existsById(id);
     }
 
+    /**
+     * Returns a list of internal identifiers of Channel entities which have match with those channel
+     * external ids from given list
+     *
+     * @param channelIds list of external Channel identifiers
+     * @return a list of internal identifiers
+     */
     @Override
     public List<Integer> findAllIdsByChannelIdFromUniqueChannelIdsList(List<Long> channelIds) {
         return channelRepository.findAllIdsByChannelIdFromUniqueChannelIdsList(channelIds);

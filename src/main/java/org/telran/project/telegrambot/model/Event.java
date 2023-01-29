@@ -5,32 +5,60 @@ import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+/**
+ * Event is entity we'll use for create notifications for users
+ *
+ * @author Olegs Gercens
+ * @version 1.0
+ */
 @Entity
 @Table(name = "event")
 public class Event {
 
+    /**
+     * Unique internal Event identifier we'll use everywhere concerning Event
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    /**
+     * Notification text
+     */
     private String text;
 
+    /**
+     * Our users internal id
+     */
     @NotNull
     @Digits(integer = Integer.MAX_VALUE, fraction = 0)
     private int userId;
 
+    /**
+     * Our channels internal id
+     */
     @NotBlank
     private int channelId;
 
-    private Boolean isNew = true;
+    /**
+     * This value describes is event new or old, when user received notifications events mark old, by default
+     * at creation isNew=true
+     */
+    private boolean isNew;
 
     public Event(String text, int userId, int channelId) {
         this.text = text;
         this.userId = userId;
         this.channelId = channelId;
+        this.isNew = true;
     }
 
     public Event() {
+        //
+    }
+
+    public boolean isNew() {
+        return isNew;
     }
 
     public int getId() {
@@ -57,11 +85,11 @@ public class Event {
         this.userId = userId;
     }
 
-    public Boolean getNew() {
+    public boolean getNew() {
         return isNew;
     }
 
-    public void setNew(Boolean aNew) {
+    public void setNew(boolean aNew) {
         isNew = aNew;
     }
 

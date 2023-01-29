@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.telran.project.telegrambot.service.EventService;
 
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/events/{userid}")
@@ -22,7 +23,9 @@ public class EventController {
         try {
             return new ResponseEntity<>(eventService.getNewEventsByUserId(userId), HttpStatus.OK);
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        } catch (NoSuchElementException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
         }
     }
 }

@@ -1,22 +1,36 @@
 package org.telran.project.telegrambot.model;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
+/**
+ * User entity is main entity we'll use everywhere concerning user
+ *
+ * @author Olegs Gercens
+ * @version 1.0
+ */
 @Entity
 @Table(name = "bot_user")
 public class User {
 
-    private static final String DEFAULT_USERNAME = "user";
-
+    /**
+     * User identifier
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @NotNull
-    private long userId;
-
+    /**
+     * Username
+     */
+    @NotBlank
     private String name;
+
+    /**
+     * Users role here, can be USER or ADMIN, by default when created is USER
+     */
+    @Enumerated(EnumType.STRING)
+    private UserRole status;
 
     public int getId() {
         return id;
@@ -34,19 +48,20 @@ public class User {
         this.name = name;
     }
 
-    public long getUserId() {
-        return userId;
+    public UserRole getStatus() {
+        return status;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setStatus(UserRole status) {
+        this.status = status;
     }
 
-    public User(String name, long userId) {
-        this.name = name.isEmpty() ? DEFAULT_USERNAME : name;
-        this.userId = userId;
+    public User(String name) {
+        this.name = name;
+        this.status = UserRole.USER;
     }
 
     public User() {
+        //
     }
 }

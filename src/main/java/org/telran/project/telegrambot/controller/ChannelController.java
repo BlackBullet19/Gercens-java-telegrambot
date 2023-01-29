@@ -9,6 +9,7 @@ import org.telran.project.telegrambot.service.ChannelService;
 
 import javax.validation.Valid;
 import java.security.InvalidParameterException;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/channels")
@@ -22,7 +23,9 @@ public class ChannelController {
         try {
             return new ResponseEntity<>(channelService.getChannel(id), HttpStatus.OK);
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+        } catch (NoSuchElementException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
         }
     }
 
@@ -30,10 +33,10 @@ public class ChannelController {
     public ResponseEntity<?> createChannel(@Valid @RequestBody Channel channel) {
         try {
             return new ResponseEntity<>(channelService.createChannel(channel), HttpStatus.OK);
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
-        } catch (IllegalStateException exception) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (InvalidParameterException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(exception.getMessage());
+        } catch (UnsupportedOperationException exception) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
         }
     }
 
@@ -43,25 +46,27 @@ public class ChannelController {
             channelService.deleteChannel(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        } catch (NoSuchElementException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateChannel(@PathVariable(name = "id") int id,@Valid @RequestBody Channel channel) {
+    public ResponseEntity<?> updateChannel(@PathVariable(name = "id") int id, @Valid @RequestBody Channel channel) {
         try {
             return new ResponseEntity<>(channelService.updateChannel(id, channel), HttpStatus.OK);
         } catch (InvalidParameterException exception) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        } catch (NoSuchElementException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
         }
     }
 
     @GetMapping
     public ResponseEntity<?> listChannels() {
-        try {
-            return new ResponseEntity<>(channelService.listChannels(), HttpStatus.OK);
-        } catch (InvalidParameterException exception) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
-        }
+        return new ResponseEntity<>(channelService.listChannels(), HttpStatus.OK);
     }
 }
