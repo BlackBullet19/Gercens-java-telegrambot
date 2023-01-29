@@ -1,10 +1,12 @@
 package org.telran.project.telegrambot.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.telran.project.telegrambot.model.Message;
 import org.telran.project.telegrambot.repository.MessageRepository;
 
@@ -12,88 +14,71 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@ActiveProfiles("test")
 class MessageServiceImplTest {
 
+    @Autowired
     private MessageService messageService;
 
     @Autowired
     private MessageRepository messageRepository;
 
-    private Message messageOne;
-    private Message messageTwo;
-
     @BeforeEach
     void setUp() {
-        messageService = new MessageServiceImpl(messageRepository);
-        messageOne = new Message(10, "titleOne", 100, "textTwo");
-        messageOne.setNew(true);
-        messageOne.setId(1);
-        messageTwo = new Message(20, "titleTwo", 200, "textTwo");
-        messageTwo.setNew(false);
-        messageRepository.save(messageOne);
-        messageRepository.save(messageTwo);
-    }
-
-    @AfterEach
-    void tearDown() {
         messageRepository.deleteAll();
     }
 
     @Test
-    void canGetListOfMessage() {
-        List<Message> list = messageService.list();
-        assertEquals(2, list.size());
+    void createMessageWithAllNonEmptyFields() {
+        List<Message> messageList = messageRepository.findAll();
+        assertEquals(0, messageList.size());
+        Message savingMessage = messageService.createMessage("title1", 123, "text");
+        List<Message> messageListAfterSavingOneMessage = messageRepository.findAll();
+        assertEquals(1, messageListAfterSavingOneMessage.size());
+        Message message = messageRepository.findById(savingMessage.getId()).get();
+        assertEquals(123L, message.getChatId());
     }
 
     @Test
-    void canGetMessageByMessageId() {
-        Message message = messageService.getMessage(10);
-        assertEquals(messageOne, message);
+    void createMessageWithWrongChatIdField() {
+        List<Message> messageList = messageRepository.findAll();
+        assertEquals(0, messageList.size());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                messageService.createMessage("title1", 0, "text"));
+        assertEquals("At least one entered parameter was 0 or empty", exception.getMessage());
+        List<Message> messageListAfterSavingOneMessage = messageRepository.findAll();
+        assertEquals(0, messageListAfterSavingOneMessage.size());
     }
 
     @Test
-    void canCreateMessageWithConstructor() {
-        messageService.createMessage(30, "titleThree", 100, "textThree");
-        Message message = messageService.getMessage(30);
-        assertEquals(100, message.getChatId());
+    void createMessageWithWrongTitleField() {
+        List<Message> messageList = messageRepository.findAll();
+        assertEquals(0, messageList.size());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                messageService.createMessage(null, 123, "text"));
+        assertEquals("At least one entered parameter was 0 or empty", exception.getMessage());
+        List<Message> messageListAfterSavingOneMessage = messageRepository.findAll();
+        assertEquals(0, messageListAfterSavingOneMessage.size());
     }
 
     @Test
-    void canRemoveMessage() {
-        messageService.removeMessage(10);
-        List<Message> list = messageService.list();
-        assertEquals(1, list.size());
-    }
-
-    @Test
-    void canUpdateMessage() {
-        Message message = messageService.updateMessage(10);
-        assertEquals(messageOne, message);
-    }
-
-    @Test
-    void canCreateMessageWithMessage() {
-        Message message = new Message(30, "titleThree", 100, "textThree");
-        messageService.createMessage(message);
-        Message gotMessage = messageService.getMessage(30);
-        assertEquals(100, gotMessage.getChatId());
-    }
-
-    @Test
-    void canListAllNewMessages() {
-        List<Message> newMessages = messageService.listAllNewMessages();
-        assertEquals(messageOne, newMessages.get(0));
-    }
-
-    @Test
-
-    void canChangeIsNewToFalse() {
-        Message messageBefore = messageService.getMessage(10);
-        int id = messageBefore.getId();
-        messageService.changeIsNewToFalse(id, id);
-        Message messageAfter = messageService.getMessage(10);
-        assertFalse(messageAfter.isNew());
-
+    void getMessagesAndMarkThemOld() {
+        List<Message> findAllFromRepository = messageRepository.findAll();
+        assertEquals(0, findAllFromRepository.size());
+        Message messageOne = new Message("title1", 123, "text");
+        Message messageTwo = new Message("title1", 123, "text");
+        Message messageThree = new Message("title1", 123, "text");
+        messageRepository.save(messageOne);
+        messageRepository.save(messageTwo);
+        messageRepository.save(messageThree);
+        List<Message> allAfterSave = messageRepository.findAll();
+        Message message = allAfterSave.get(1);
+        assertTrue(message.isNew());
+        messageService.getMessagesAndMarkThemOld();
+        List<Message> allMessagesIsNewFalse = messageRepository.findAll();
+        Message messageIsNewFalse = allMessagesIsNewFalse.get(1);
+        assertFalse(messageIsNewFalse.isNew());
     }
 }
