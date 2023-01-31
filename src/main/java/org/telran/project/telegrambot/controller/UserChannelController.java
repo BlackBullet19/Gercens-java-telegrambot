@@ -30,8 +30,8 @@ public class UserChannelController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createUserSubscription(@PathVariable(name = "userid") int userId, @Valid @RequestBody UserChannel userChannel) {
-
+    public ResponseEntity<?> createUserSubscription(@PathVariable(name = "userid") int userId,
+                                                    @Valid @RequestBody UserChannel userChannel) {
         try {
             return new ResponseEntity<>(userChannelService.addUserSubscription(userId, userChannel), HttpStatus.OK);
         } catch (InvalidParameterException exception) {
@@ -48,7 +48,6 @@ public class UserChannelController {
     @DeleteMapping("/{channelid}")
     public ResponseEntity<?> deleteUserSubscription(@PathVariable(name = "userid") int userId,
                                                     @PathVariable(name = "channelid") int userChannel) {
-
         try {
             userChannelService.removeUserSubscription(userId, userChannel);
             return ResponseEntity.noContent().build();
